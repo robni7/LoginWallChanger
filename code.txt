@@ -2,7 +2,7 @@ display dialog "This applet will help you install a custom login window wallpape
 
 Use at your own risk. Be sure to have a back-up of your system before proceeding.
 
-Version 1.1, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1
+Version 1.2, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1
 
 set qUser1 to display dialog "Enter your user name. You have to be an administrator." default answer "" with icon note buttons {"Close", "Next"} default button 2 cancel button 1
 set user1 to text returned of qUser1
@@ -41,15 +41,16 @@ else if csrStatus is "System Integrity Protection status: disabled." then -- If 
 	do shell script "killall Finder"
 	set progress completed steps to 3
 	set progress additional description to "Renaming original Catalina wallpaper to \"Catalina-dynamic\"..."
-	do shell script "mv /System/Library/Desktop\\ Pictures/Catalina.heic /System/Library/Desktop\\ Pictures/Catalina-dynamic.heic" user name user1 password password1 with administrator privileges
+	--do shell script "mv /System/Library/Desktop\\ Pictures/Catalina.heic /System/Library/Desktop\\ Pictures/Catalina-dynamic.heic" user name user1 password password1 with administrator privileges
 	set progress completed steps to 4
 	set progress additional description to "Copying your chosen wallpaper to /System/Desktop Pictures/..."
-	do shell script "cp " & pathWallpaper & " /System/Library/Desktop\\ Pictures/Catalina.heic" user name user1 password password1 with administrator privileges
+	--display dialog "cp " & quoted form of pathWallpaper & " /System/Library/Desktop\\ Pictures/Catalina.heic" buttons {"can"} cancel button 1
+	do shell script "cp " & quoted form of pathWallpaper & " /System/Library/Desktop\\ Pictures/Catalina.heic" user name user1 password password1 with administrator privileges
 	set progress completed steps to 5
 	set progress additional description to "Updating preboot volume..."
 	do shell script "diskutil apfs updatePreboot /"
 	set progress completed steps to 6
-	set qSuccess to display dialog "Your wallpaper has been set. Reboot to macOS Recovery to re-enable SIP with the Terminal command \"csrutil enable\".." buttons {"Close", "Reboot"} default button 2 cancel button 1
+	set qSuccess to display dialog "Your wallpaper has been set. Reboot to macOS Recovery to re-enable SIP with the Terminal command \"csrutil enable\"." buttons {"Close", "Reboot"} default button 2 cancel button 1
 	if button returned of qSuccess is 2 then
 		do shell script "reboot" user name user1 password password1 with administrator privileges
 	end if
