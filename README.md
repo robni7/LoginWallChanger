@@ -7,4 +7,4 @@ Use at your own risk. Be sure to have a back-up of your system before proceeding
 
 Version 1.2, by robni7. See code.txt for the source AppleScript code.
 
-![Alt text](/CatalinaLoginWallChanger/screenshots/LW.png?raw=true "Screen shot")
+![Alt text](/screenshots/LW.png?raw=true "Screen shot")
