@@ -1,26 +1,26 @@
-display dialog "This applet will help you install a custom login window wallpaper. This is done by replacing the standard Catalina wallpaper by a file of your choice.
+display dialog "This applet will help you install a custom login window wallpaper. This is done by renaming the standard Catalina wallpaper to Catalina-dynamic and replacing it by an image file of your choice.
 
 Use at your own risk. Be sure to have a back-up of your system before proceeding.
 
-Version 1, by robni7. See github.com/robni7/CatalinaLoginWallpaper" buttons {"Close", "Next"} default button 2 cancel button 1
+Version 1.1, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1
 
-set qUser1 to display dialog "Enter your user name. You have to be an administrator." default answer "" buttons {"Close", "Next"} default button 2 cancel button 1
+set qUser1 to display dialog "Enter your user name. You have to be an administrator." default answer "" with icon note buttons {"Close", "Next"} default button 2 cancel button 1
 set user1 to text returned of qUser1
-set qPassword1 to display dialog "Hello, " & user1 & ". Enter your password." default answer "" buttons {"Close", "Next"} default button 2 cancel button 1
+set qPassword1 to display dialog "Hello, " & user1 & ". Enter your password." default answer "" with icon stop buttons {"Close", "Next"} default button 2 cancel button 1 with hidden answer
 set password1 to text returned of qPassword1
 
 -- Check the password combo
 try
 	do shell script "true" user name user1 password password1 with administrator privileges
-on error
-	set error2AlertText to "Error -2: Incorrect credentials"
+on error the errorMessage number the errorNumber
+	set error2AlertText to "Error " & errorNumber & ": " & errorMessage
 	set error2AlertMessage to "The entered user name / password combination is either incorrect or does not belong to an administrator."
-	display alert error2AlertText message error2AlertMessage as critical buttons {"Close"} cancel button {"Close"}
+	display alert error2AlertText message error2AlertMessage as critical buttons {"Close"} cancel button 1
 end try
 
 set csrStatus to do shell script "csrutil status"
 -- debug: display dialog csrStatus
-if csrStatus is "System Integrity Protection status: enabled." then -- Als SIP = aan
+if csrStatus is "System Integrity Protection status: enabled." then -- If SIP = enabled
 	--error
 	set qCsrOn to display dialog "System Integrity Protection is enabled. Disable SIP in macOS Recovery with the Terminal command \"csrutil disable\"." buttons {"Close", "Reboot"} default button 2 cancel button 1
 	if button returned of qCsrOn is 2 then
@@ -54,7 +54,7 @@ else if csrStatus is "System Integrity Protection status: disabled." then -- If 
 		do shell script "reboot" user name user1 password password1 with administrator privileges
 	end if
 else -- Unknown CSRstatus error
-	set error1AlertText to "Error -1: Unknown SIP-status"
+	set error1AlertText to "Error: Unknown SIP-status"
 	set error1AlertMessage to "\"csrutil status\" returned \"" & csrStatus & "\""
 	display alert error1AlertText message error1AlertMessage as critical buttons {"Close"} cancel button {"Close"}
 end if
