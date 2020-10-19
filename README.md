@@ -7,4 +7,8 @@ Use at your own risk. Be sure to have a back-up of your system before proceeding
 
 Version 1.2, by robni7. See code.txt for the source AppleScript code.
 
+<b>How to use:</b>  
+Dowload the files by using the green download button -> Dowload ZIP.  
+After you have unpacked the ZIP, launch CatalinaLoginWallChanger.app. You may have to control-click and choose "open" to open the applet.
+
 ![Alt text](/../screenshots/LW.png?raw=true "Screen shot")
