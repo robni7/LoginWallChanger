@@ -4,7 +4,7 @@ Note: A side effect of this method is that the chosen wallpaper will also be the
 
 Use at your own risk. Be sure to have a back-up of your system before proceeding.
 
-Version 1.2, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1
+Version 1.3, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1
 
 set qUser1 to display dialog "Enter your user name. You have to be an administrator." default answer "" with icon note buttons {"Close", "Next"} default button 2 cancel button 1
 set user1 to text returned of qUser1
@@ -53,8 +53,9 @@ else if csrStatus is "System Integrity Protection status: disabled." then -- If 
 	do shell script "diskutil apfs updatePreboot /"
 	set progress completed steps to 6
 	set qSuccess to display dialog "Your wallpaper has been set. Reboot to macOS Recovery to re-enable SIP with the Terminal command \"csrutil enable\"." buttons {"Close", "Reboot"} default button 2 cancel button 1
-	if button returned of qSuccess is 2 then
-		do shell script "reboot" user name user1 password password1 with administrator privileges
+	if button returned of qSuccess is "Reboot" then
+		--do shell script "reboot" user name user1 password password1 with administrator privileges
+		tell application "System Events" to restart
 	end if
 else -- Unknown CSRstatus error
 	set error1AlertText to "Error: Unknown SIP-status"
