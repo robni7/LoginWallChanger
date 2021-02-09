@@ -2,6 +2,81 @@ display dialog "This applet will help you install a custom login window wallpape
 
 Note: A side effect of this method is that the chosen wallpaper will also be the default wallpaper for new users.
 
+You will need to disable System Integrity Protection in order for this to work. Please make sure you are also aware of the implications this may have on your system.
+
 Use at your own risk. Be sure to have a back-up of your system before proceeding.
 
-Version 1.4, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1set qUser1 to display dialog "Enter your user name. You have to be an administrator." default answer "" with icon note buttons {"Close", "Next"} default button 2 cancel button 1set user1 to text returned of qUser1set qPassword1 to display dialog "Hello, " & user1 & ". Enter your password." default answer "" with icon stop buttons {"Close", "Next"} default button 2 cancel button 1 with hidden answerset password1 to text returned of qPassword1try -- Check if the password combo is from an Administrator	do shell script "true" user name user1 password password1 with administrator privilegeson error the errorMessage number the errorNumber	set error2AlertText to "Error " & errorNumber & ": " & errorMessage	set error2AlertMessage to "The entered user name / password combination is either incorrect or does not belong to an administrator."	display alert error2AlertText message error2AlertMessage as critical buttons {"Close"} cancel button 1end tryset csrStatus to do shell script "csrutil status"-- debug: display dialog csrStatusif csrStatus is "System Integrity Protection status: enabled." then -- If SIP = enabled, we display an error	set qCsrOn to display dialog "System Integrity Protection is enabled. Disable SIP in macOS Recovery with the Terminal command \"csrutil disable\"." buttons {"Close", "Reboot"} default button "Reboot" cancel button "Close"	if button returned of qCsrOn is "Reboot" then		tell application "System Events" to restart	end if	else if csrStatus is "System Integrity Protection status: disabled." then -- If SIP = off, we can do our jobs	set progress total steps to 6	set progress completed steps to 0	set progress description to "Setting login wallpaper..."	set progress additional description to "Waiting for user to select a wallpaper..."	set aliasWallpaper to choose file with prompt "Select a suitable wallpaper (.jpg, .png or .heic)" of type {"jpg", "jpeg", "png", "heic"}	set pathWallpaper to POSIX path of aliasWallpaper		set progress completed steps to 1	set progress additional description to "Mounting root file system as read-write..."	do shell script "mount -wu /" user name user1 password password1 with administrator privileges		set progress completed steps to 2	set progress additional description to "Restarting Finder..."	do shell script "killall Finder"		set progress completed steps to 3	set progress additional description to "Renaming original Catalina wallpaper to \"Catalina-dynamic\"..."	set fileCatalinaBackup to "/System/Library/Desktop\\ Pictures/Catalina-dynamic.heic" as string	tell application "System Events" -- first, we check if the backup already exists (if we skipped this step, running this applet a second time would replace the backup with the old custom wallpaper)		if exists file fileCatalinaBackup then			-- do nothing for now, for the original wallpaper is already backed up		else			my BackupCatalina(user1, password1)		end if	end tell		set progress completed steps to 4	set progress additional description to "Copying your chosen wallpaper to /System/Desktop Pictures/..."	do shell script "cp " & quoted form of pathWallpaper & " /System/Library/Desktop\\ Pictures/Catalina.heic" user name user1 password password1 with administrator privileges	-- cp will overwrite files by default, so only the original backup and the current wallpaper will be kept.		set progress completed steps to 5	set progress additional description to "Updating preboot volume..."	do shell script "diskutil apfs updatePreboot /"		set progress completed steps to 6	set qSuccess to display dialog "Your wallpaper has been set. Reboot normally to apply changes. If you like the result, do not forget to re-enable SIP with the Terminal command \"csrutil enable\" in macOS Recovery." buttons {"Close", "Reboot and apply changes"} default button "Reboot and apply changes" cancel button "Close"	if button returned of qSuccess is "Reboot and apply changes" then		tell application "System Events" to restart	end if	else -- Unknown CSRstatus error	set error1AlertText to "Error: Unknown SIP-status"	set error1AlertMessage to "\"csrutil status\" returned \"" & csrStatus & "\""	display alert error1AlertText message error1AlertMessage as critical buttons {"Close"} cancel button {"Close"}end ifon BackupCatalina(user1, password1)	do shell script "mv /System/Library/Desktop\\ Pictures/Catalina.heic /System/Library/Desktop\\ Pictures/Catalina-dynamic.heic" user name user1 password password1 with administrator privilegesend BackupCatalina
+Version 1.5, by robni7. See github.com/robni7/CatalinaLoginWallChanger" buttons {"Close", "Next"} default button 2 cancel button 1
+
+set qUser1 to display dialog "Enter your user name. You have to be an administrator." default answer "" with icon note buttons {"Close", "Next"} default button 2 cancel button 1
+set user1 to text returned of qUser1
+set qPassword1 to display dialog "Hello, " & user1 & ". Enter your password." default answer "" with icon stop buttons {"Close", "Next"} default button 2 cancel button 1 with hidden answer
+set password1 to text returned of qPassword1
+
+try -- Check if the password combo is from an Administrator
+	do shell script "true" user name user1 password password1 with administrator privileges
+on error the errorMessage number the errorNumber
+	set error2AlertText to "Error " & errorNumber & ": " & errorMessage
+	set error2AlertMessage to "The entered user name / password combination is either incorrect or does not belong to an administrator."
+	display alert error2AlertText message error2AlertMessage as critical buttons {"Close"} cancel button 1
+end try
+
+set csrStatus to do shell script "csrutil status"
+-- debug: display dialog csrStatus
+if csrStatus is "System Integrity Protection status: enabled." then -- If SIP = enabled, we display an error
+	set qCsrOn to display dialog "System Integrity Protection is enabled. Disable SIP in macOS Recovery with the Terminal command \"csrutil disable\"." buttons {"Close", "Reboot"} default button "Reboot" cancel button "Close"
+	if button returned of qCsrOn is "Reboot" then
+		tell application "System Events" to restart
+	end if
+	
+else if csrStatus is "System Integrity Protection status: disabled." then -- If SIP = off, we can do our jobs
+	set progress total steps to 6
+	set progress completed steps to 0
+	set progress description to "Setting login wallpaper..."
+	set progress additional description to "Waiting for user to select a wallpaper..."
+	set aliasWallpaper to choose file with prompt "Select a suitable wallpaper (.jpg, .png or .heic)" of type {"jpg", "jpeg", "png", "heic"}
+	set pathWallpaper to POSIX path of aliasWallpaper
+	
+	set progress completed steps to 1
+	set progress additional description to "Mounting root file system as read-write..."
+	do shell script "mount -wu /" user name user1 password password1 with administrator privileges
+	
+	set progress completed steps to 2
+	set progress additional description to "Restarting Finder..."
+	do shell script "killall Finder"
+	
+	set progress completed steps to 3
+	set progress additional description to "Renaming original Catalina wallpaper to \"Catalina-dynamic\"..."
+	set fileCatalinaBackup to "/System/Library/Desktop\\ Pictures/Catalina-dynamic.heic" as string
+	tell application "System Events" -- first, we check if the backup already exists (if we skipped this step, running this applet a second time would replace the backup with the old custom wallpaper)
+		if exists file fileCatalinaBackup then
+			-- do nothing for now, for the original wallpaper is already backed up
+		else
+			my BackupCatalina(user1, password1)
+		end if
+	end tell
+	
+	set progress completed steps to 4
+	set progress additional description to "Copying your chosen wallpaper to /System/Desktop Pictures/..."
+	do shell script "cp " & quoted form of pathWallpaper & " /System/Library/Desktop\\ Pictures/Catalina.heic" user name user1 password password1 with administrator privileges
+	-- cp will overwrite files by default, so only the original backup and the current wallpaper will be kept.
+	
+	set progress completed steps to 5
+	set progress additional description to "Updating preboot volume..."
+	do shell script "diskutil apfs updatePreboot /"
+	
+	set progress completed steps to 6
+	set qSuccess to display dialog "Your wallpaper has been set. Reboot normally to apply changes. If you like the result, do not forget to re-enable SIP with the Terminal command \"csrutil enable\" in macOS Recovery." buttons {"Close", "Reboot and apply changes"} default button "Reboot and apply changes" cancel button "Close"
+	if button returned of qSuccess is "Reboot and apply changes" then
+		tell application "System Events" to restart
+	end if
+	
+else -- Unknown CSRstatus error
+	set error1AlertText to "Error: Unknown SIP-status"
+	set error1AlertMessage to "\"csrutil status\" returned \"" & csrStatus & "\""
+	display alert error1AlertText message error1AlertMessage as critical buttons {"Close"} cancel button {"Close"}
+end if
+
+on BackupCatalina(user1, password1)
+	do shell script "mv /System/Library/Desktop\\ Pictures/Catalina.heic /System/Library/Desktop\\ Pictures/Catalina-dynamic.heic" user name user1 password password1 with administrator privileges
+end BackupCatalina
